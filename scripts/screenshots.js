@@ -1,7 +1,10 @@
-const { chromium } = require("/Users/hale/projects/vooks/vooks-ui/node_modules/playwright");
+// Screenshot helper. Run the server first, then:
+//   npm i playwright && npx playwright install chromium
+//   OUT=./screenshots node scripts/screenshots.js
+const { chromium } = require("playwright");
 
 const BASE = process.env.BASE || "http://127.0.0.1:8077";
-const OUT = process.env.OUT || "/Users/hale/Desktop/Career/fiverr_demos/ai-docs-assistant";
+const OUT = process.env.OUT || "./screenshots";
 const SIZE = { width: 1280, height: 769 };
 
 const askAndWait = async (page, text) => {

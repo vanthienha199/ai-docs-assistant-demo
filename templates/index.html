@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% set page = 'ask' %}
+{% block title %}Ask your documents | DocDesk{% endblock %}
+{% block body %}
+
+<div class="head">
+  <h1>Answers from your own documents, with the source attached</h1>
+  <p>Every sentence is traced back to the passage it came from. When the documents do not cover a question, the assistant says so instead of guessing.</p>
+  <p class="corpus">Indexed right now: <strong>{{ doc_count }} documents</strong> split into <strong>{{ chunk_count }} passages</strong></p>
+</div>
+
+<form class="ask" action="/" method="get">
+  <input name="q" value="{{ question }}" placeholder="Ask something about the policies, pricing or service area" autocomplete="off">
+  <button type="submit">Ask</button>
+</form>
+
+<div class="chips">
+  <span>Try:</span>
+  {% for s in suggested %}<a href="/?q={{ s | urlencode }}">{{ s }}</a>{% endfor %}
+</div>
+
+{% if result %}
+<div class="answer {{ 'refused' if not result.grounded }}">
+  <div class="a-top">
+    {% if result.grounded %}
+      Answered from {{ result.citations | length }} source{{ '' if result.citations|length == 1 else 's' }}
+    {% else %}
+      Outside the indexed documents
+    {% endif %}
+    <span class="right">
+      {% if result.grounded %}<span class="pill ok">grounded</span>{% else %}<span class="pill">refused by grounding gate</span>{% endif %}
+      <span class="pill">top score {{ '%.2f' % result.top_score }}</span>
+      <span class="pill">{{ result.backend }}</span>
+    </span>
+  </div>
+
+  <div class="a-body">
+    <p class="q">You asked: <b>{{ result.question }}</b></p>
+    <p class="text">{{ result.answer_html | safe }}</p>
+  </div>
+
+  {% if result.citations %}
+  <div class="sources">
+    <h3>Sources</h3>
+    {% for c in result.citations %}
+    <div class="src">
+      <div class="n">{{ c.n }}</div>
+      <div class="meta">
+        <div class="label">{{ c.label }}</div>
+        <div class="file">{{ c.doc_id }}</div>
+        <div class="snip">{{ c.snippet }}</div>
+      </div>
+      <div class="score"><em>match</em><b>{{ '%.2f' % c.score }}</b></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<details class="retr" {{ 'open' if not result.grounded }}>
+  <summary>Retrieval detail: {{ result.considered | length }} passages scored{% if not result.grounded %}, none cleared the grounding threshold{% endif %}</summary>
+  <div class="inner">
+    {% for r in result.considered %}
+    <div class="rrow">
+      <div class="bar"><i style="width: {{ (100 * r.score / (result.considered[0].score or 1)) | round(0, 'floor') }}%"></i></div>
+      <div>{{ r.label }}</div>
+      <div class="sc">{{ '%.2f' % r.score }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</details>
+{% endif %}
+
+{% endblock %}

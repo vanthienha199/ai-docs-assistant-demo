@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}DocDesk{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="brand" href="/"><span class="mark">D</span><b>DocDesk</b></a>
+    <span class="badge-sample">Sample demo</span>
+    <nav class="links">
+      <a href="/" class="{{ 'on' if page == 'ask' }}">Ask</a>
+      <a href="/documents" class="{{ 'on' if page == 'docs' }}">Documents</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">{% block body %}{% endblock %}</main>
+<footer class="foot"><div class="wrap">Sample project built on invented documents for a fictional company. Not a real business.</div></footer>
+</body>
+</html>
