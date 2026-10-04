@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documents, Blue Harbor Support Assistant (Sample)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">B</div>
+      <h1>Blue Harbor<span>Support assistant</span></h1>
+    </div>
+    <div class="tag">Sample project, fictional company</div>
+    <div class="corpus">
+      <h2>How indexing works</h2>
+      <p style="margin:0">Each file is split on its headings, then into passages of about 900 characters. Passages are ranked with BM25 at query time, so a new document is searchable the moment it is indexed.</p>
+    </div>
+    <footer>
+      <a href="/">Back to the assistant</a><br>
+      Built by Ha Le as a portfolio sample.
+    </footer>
+  </aside>
+
+  <main class="main">
+    <nav class="nav">
+      <a href="/">Assistant</a>
+      <a href="/admin" class="on">Documents</a>
+    </nav>
+
+    <header>
+      <h2>Indexed documents</h2>
+      <p class="lede">Everything the assistant is allowed to use. Add a file and it is chunked and searchable straight away, with no rebuild step and no vector database to host.</p>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>File</th>
+          <th class="num-col">Passages</th>
+          <th class="num-col">Words</th>
+          <th class="num-col">Size</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div class="panel">
+      <h3>Add a document</h3>
+      <p>Markdown or plain text, up to 2 MB. The index rebuilds on upload.</p>
+      <div class="row">
+        <input type="file" id="file" accept=".md,.markdown,.txt">
+        <button class="btn" id="upload">Upload and index</button>
+        <button class="btn ghost" id="reindex">Rebuild index</button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const rows = document.getElementById("rows");
+const status = document.getElementById("status");
+
+const kb = (n) => (n / 1024).toFixed(1) + " KB";
+
+async function load() {
+  const data = await (await fetch("/api/documents")).json();
+  rows.innerHTML = data.documents
+    .map(
+      (d) => `<tr>
+        <td><strong>${d.title}</strong></td>
+        <td>${d.filename}</td>
+        <td class="num-col">${d.chunks}</td>
+        <td class="num-col">${d.words}</td>
+        <td class="num-col">${kb(d.bytes)}</td>
+      </tr>`
+    )
+    .join("");
+  status.textContent = `${data.documents.length} documents, ${data.total_chunks} passages indexed`;
+}
+
+document.getElementById("reindex").addEventListener("click", async () => {
+  const r = await (await fetch("/api/reindex", { method: "POST" })).json();
+  status.textContent = `Rebuilt ${r.chunks} passages in ${r.ms} ms`;
+  load();
+});
+
+document.getElementById("upload").addEventListener("click", async () => {
+  const file = document.getElementById("file").files[0];
+  if (!file) {
+    status.textContent = "Choose a file first";
+    return;
+  }
+  const body = new FormData();
+  body.append("file", file);
+  const res = await fetch("/api/documents", { method: "POST", body });
+  const data = await res.json();
+  status.textContent = res.ok
+    ? `Indexed ${data.filename}, ${data.chunks} passages total`
+    : data.detail;
+  load();
+});
+
+load();
+</script>
+</body>
+</html>
