@@ -42,20 +42,26 @@ const dropTiming = (p) =>
 }
 
 // 2. deliverable tiles, light, cropped to the main panel so each tile proves its own label
-async function tile(file, theme, path, question) {
+async function tile(file, theme, path, question, selector = ".main") {
   const p = await page(1180, 820, theme, path);
   if (question) await ask(p, question);
   await new Promise((r) => setTimeout(r, 400));
-  const el = await p.$(".main");
+  // The local CLI backend's timing is not representative of the hosted API, so it
+  // is left out of the tiles the same way it is left out of the hero.
+  await dropTiming(p);
+  const el = await p.$(selector);
   await el.screenshot({ path: `${OUT}/${file}` });
   await p.close();
   console.log("wrote", file);
 }
 
-await tile("cited_light.png", "light", "/", "How long is the workmanship guarantee?");
-await tile("admin_light.png", "light", "/admin");
-await tile("refusal_light.png", "light", "/", "Do you install swimming pools in Canada?");
-await tile("empty_light.png", "light", "/");
+// Tiles are captured from the tightest element that proves the label, so no tile
+// carries dead space or another tile's chrome.
+await tile("cited_light.png", "light", "/", "How long is the workmanship guarantee?", ".thread");
+await tile("admin_light.png", "light", "/admin", null, "table");
+await tile("refusal_light.png", "light", "/", "Do you install swimming pools in Canada?", ".thread");
+await tile("upload_light.png", "light", "/admin", null, ".main");
+await tile("empty_light.png", "light", "/", null, ".thread");
 
 // 3. extra states kept for the demo folder gallery
 {
