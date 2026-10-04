@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = Path(os.environ.get("DOCS_DIR", ROOT / "docs"))
 STATIC_DIR = ROOT / "static"
 MIN_SCORE = float(os.environ.get("MIN_SCORE", "4.5"))
+MIN_COVERAGE = float(os.environ.get("MIN_COVERAGE", "0.34"))
 NO_ANSWER = "I could not find that in the Blue Harbor documents."
 
 app = FastAPI(title="Blue Harbor Support Assistant (Sample)")
@@ -30,7 +31,18 @@ class Question(BaseModel):
 
 
 def snippet_of(text: str, limit: int = 260) -> str:
-    flat = re.sub(r"\s+", " ", text).strip()
+    """Flatten a passage for display. Markdown table pipes are turned into
+    readable separators so a price table does not show up as a row of dashes."""
+    lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.fullmatch(r"\|[\s|:-]*\|", stripped):
+            continue  # a table separator row carries no information
+        if stripped.startswith("|"):
+            cells = [c.strip() for c in stripped.strip("|").split("|") if c.strip()]
+            stripped = " · ".join(cells)
+        lines.append(stripped)
+    flat = re.sub(r"\s+", " ", " ".join(lines)).strip()
     return flat if len(flat) <= limit else flat[:limit].rsplit(" ", 1)[0] + "..."
 
 
@@ -85,7 +97,11 @@ def chat(payload: Question) -> JSONResponse:
 
     started = time.perf_counter()
     hits = index.search(question, top_k=4)
-    grounded = bool(hits) and hits[0][1] >= MIN_SCORE
+    coverage = index.vocabulary_coverage(question)
+    # Two signals have to agree before the model is allowed to answer: the best
+    # passage has to score well, and the question has to be made of words this
+    # corpus actually knows. Either one alone lets odd questions through.
+    grounded = bool(hits) and hits[0][1] >= MIN_SCORE and coverage >= MIN_COVERAGE
 
     if not grounded:
         return JSONResponse(
@@ -97,6 +113,7 @@ def chat(payload: Question) -> JSONResponse:
                 "backend": "guard",
                 "model": "retrieval guard, no model call",
                 "top_score": hits[0][1] if hits else 0.0,
+                "coverage": coverage,
                 "ms": round((time.perf_counter() - started) * 1000, 1),
             }
         )
@@ -113,8 +130,19 @@ def chat(payload: Question) -> JSONResponse:
         for i, (chunk, score) in enumerate(hits)
     ]
     text, backend = generate_answer(question, passages)
-    used = sorted({int(n) for n in re.findall(r"\[(\d+)\]", text)})
-    citations = [p for p in passages if p["n"] in used] or passages[:1]
+
+    # Verify citations against what was actually retrieved. A model can invent a
+    # number like [7] when only four passages exist. Those markers are removed
+    # before the answer reaches the page, and the count is reported.
+    cited = [int(n) for n in re.findall(r"\[(\d+)\]", text)]
+    valid = sorted({n for n in cited if 1 <= n <= len(passages)})
+    dropped = len([n for n in cited if not 1 <= n <= len(passages)])
+    text = re.sub(
+        r"\s*\[(\d+)\]",
+        lambda mo: mo.group(0) if 1 <= int(mo.group(1)) <= len(passages) else "",
+        text,
+    )
+    citations = [p for p in passages if p["n"] in valid] or passages[:1]
 
     return JSONResponse(
         {
@@ -126,6 +154,8 @@ def chat(payload: Question) -> JSONResponse:
             "backend": backend,
             "model": MODEL,
             "top_score": hits[0][1],
+            "coverage": coverage,
+            "dropped_citations": dropped,
             "ms": round((time.perf_counter() - started) * 1000, 1),
         }
     )

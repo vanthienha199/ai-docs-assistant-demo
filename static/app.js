@@ -10,6 +10,8 @@ const withCitations = (s) =>
   escapeHtml(s).replace(/\s*\[(\d+)\]/g, '<sup>$1</sup>');
 
 function addQuestion(text) {
+  const empty = document.getElementById("empty");
+  if (empty) empty.remove();
   const el = document.createElement("div");
   el.className = "turn-q";
   el.textContent = text;
@@ -42,6 +44,8 @@ function addAnswer(data) {
       <span><b>Grounded</b> ${data.grounded ? "yes" : "no, the assistant is blocked from answering"}</span>
       <span><b>Top match</b> ${data.top_score}</span>
       <span><b>Model</b> ${escapeHtml(data.model || data.backend)}</span>
+      <span><b>Coverage</b> ${data.coverage}</span>
+      ${data.dropped_citations ? `<span><b>Dropped</b> ${data.dropped_citations} bad citation</span>` : ""}
       <span><b>Time</b> ${data.ms} ms</span>
     </div>`;
   thread.appendChild(el);

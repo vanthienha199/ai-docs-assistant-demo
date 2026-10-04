@@ -6,8 +6,9 @@
 <title>Blue Harbor Support Assistant (Sample)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/styles.css">
+<script>var t=new URLSearchParams(location.search).get("theme");if(t)document.documentElement.dataset.theme=t;</script>
 </head>
 <body>
 <div class="shell">
@@ -53,7 +54,13 @@
       <p class="lede">The assistant reads five internal documents and answers only from them. Every sentence carries a numbered citation, and when the handbook does not cover a question it says so instead of guessing.</p>
     </header>
 
-    <div class="thread" id="thread"></div>
+    <div class="thread" id="thread">
+      <div class="empty" id="empty">
+        <div class="ico">?</div>
+        <b>No questions yet</b>
+        <span>Pick one of the examples on the left, or ask anything covered by the five handbook documents.</span>
+      </div>
+    </div>
 
     <form class="composer" id="composer" autocomplete="off">
       <input id="q" placeholder="Ask about pricing, booking, warranty, emergencies or payment" aria-label="Your question">

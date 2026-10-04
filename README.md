@@ -27,3 +27,20 @@ Drop `.md` or `.txt` files into `docs/` and restart, or upload them on the admin
 | `MIN_SCORE` | Retrieval score needed before the assistant may answer at all |
 
 Built by Ha Le as a portfolio sample. No client data is used anywhere in this repository.
+
+## Two things that are not in a basic RAG demo
+
+**The refusal is real logic.** Retrieval runs first and two signals have to agree before
+the model is called: the best passage must score above `MIN_SCORE`, and the question must
+be made of words the corpus actually knows (`MIN_COVERAGE`). Either signal alone lets odd
+questions through. An out of scope question therefore returns in about 2 ms and reports
+`retrieval guard, no model call`.
+
+**Citations are verified after generation.** A model can write `[7]` when only four
+passages were retrieved. Every marker is checked against what was really retrieved,
+invalid ones are stripped before the answer reaches the page, and the count is returned
+as `dropped_citations`.
+
+## Themes
+
+The UI ships dark and light. Append `?theme=light` to any page to switch.

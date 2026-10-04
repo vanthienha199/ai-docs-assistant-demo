@@ -157,6 +157,18 @@ class Index:
             return 0.0
         return math.log(1 + (n - df + 0.5) / (df + 0.5))
 
+    def vocabulary_coverage(self, question: str) -> float:
+        """Share of the question's terms that exist anywhere in the corpus.
+
+        A question about a topic the documents never mention scores near zero here
+        even when one or two common words happen to match a passage.
+        """
+        query = set(expand(tokenize(question)))
+        if not query:
+            return 0.0
+        known = sum(1 for term in query if self.doc_freq.get(term))
+        return round(known / len(query), 3)
+
     def search(self, question: str, top_k: int = 4) -> list[tuple[Chunk, float]]:
         query = expand(tokenize(question))
         if not query:
