@@ -41,13 +41,9 @@ async function clip(page, selector, out, pad = 0, maxHeight = 0) {
 }
 
 /* 1. the hero: a cited answer sitting beside the handbook page it came from */
-let page = await open("/", 1000, 769);
-await ask(page, "How long is the workmanship guarantee and what does it not cover?");
-/* the cover band covers the answer column, so the page is scrolled until the
-   handbook page fills the part of the shot that stays visible */
-await page.evaluate(() => window.scrollTo(0, document.querySelector(".order-body").getBoundingClientRect().top + window.scrollY - 8));
-await sleep(500);
-await page.screenshot({ path: `${RAW}/cover_band.png` });
+let page = await open("/", 1000, 1070);
+await ask(page, "What does an emergency call out cost at night?");
+await page.screenshot({ path: `${RAW}/cover_app.png` });
 await page.close();
 
 page = await open("/", 1440, 900);

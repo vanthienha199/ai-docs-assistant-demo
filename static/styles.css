@@ -2,6 +2,19 @@
    Canvas #F4F5F2, surface white, ink #0F1B2D, harbor navy for actions and links,
    signal orange only where the handbook does not cover a question. */
 
+/* Atkinson Hyperlegible's zero is permanently slashed, which is right for a label
+   but reads as code in a price or a page number. Digits are taken from Archivo
+   instead, by unicode range, so every letter still comes from Atkinson. */
+@font-face {
+  font-family: "Harbor Figures";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/archivo/v25/k3kQo8UDI-1M0wlSfdnoLmvDIaI.woff2) format("woff2");
+  unicode-range: U+0030-0039;
+}
+
 :root {
   --canvas: #F4F5F2;
   --surface: #FFFFFF;
@@ -15,7 +28,7 @@
   --rule: #DCDED8;
   --rule-2: #EAEBE6;
   --display: "Archivo", system-ui, sans-serif;
-  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --body: "Harbor Figures", "Atkinson Hyperlegible", system-ui, sans-serif;
   --shadow: 0 1px 1px rgba(15, 27, 45, .07), 0 10px 28px -12px rgba(15, 27, 45, .18);
 }
 
