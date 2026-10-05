@@ -92,4 +92,4 @@ await clip(page, ".order", `${RAW}/cited_emergency.png`);
 await page.close();
 
 await browser.close();
-console.log("captures written");
+console.log("captures written, now run scripts/resize_shots.py");
