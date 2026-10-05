@@ -3,71 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Blue Harbor Support Assistant (Sample)</title>
+<title>Blue Harbor Plumbing, handbook assistant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Atkinson+Hyperlegible:wght@400;700&family=Red+Hat+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/styles.css">
-<script>var t=new URLSearchParams(location.search).get("theme");if(t)document.documentElement.dataset.theme=t;</script>
 </head>
 <body>
-<div class="shell">
-  <aside class="side">
-    <div class="brand">
-      <div class="mark">B</div>
-      <h1>Blue Harbor<span>Support assistant</span></h1>
-    </div>
 
-    <div class="tag">Sample project, fictional company</div>
+<header class="masthead">
+  <h1 class="wordmark">Blue Harbor Plumbing<small>Handbook assistant, internal</small></h1>
+  <nav>
+    <a href="/" class="on">Assistant</a>
+    <a href="/admin">Documents</a>
+  </nav>
+</header>
 
-    <div>
-      <h2>Try a question</h2>
-      <div class="examples">
-        <button type="button">What does an emergency call out cost at night?</button>
-        <button type="button">How long is the workmanship guarantee?</button>
-        <button type="button">Can I cancel an appointment on the day?</button>
-        <button type="button">Do you take American Express?</button>
-        <button type="button">Do you install swimming pools in Canada?</button>
+<section class="ask">
+  <form id="composer" autocomplete="off">
+    <input id="q" placeholder="Ask about pricing, booking, warranty, emergencies or payment" aria-label="Your question">
+    <button type="submit" id="send">Ask</button>
+  </form>
+  <div class="examples">
+    <span>Or try</span>
+    <button type="button">What does an emergency call out cost at night?</button>
+    <button type="button">How long is the workmanship guarantee?</button>
+    <button type="button">Can I cancel an appointment on the day?</button>
+    <button type="button">Do you install swimming pools in Canada?</button>
+  </div>
+</section>
+
+<main class="wo">
+  <article class="order" id="order">
+    <div class="order-body">
+      <div class="answer-col">
+        <div class="blank">
+          <h2>No question open yet</h2>
+          <p>Ask anything the five handbook documents cover. The answer appears here with footnotes, and the handbook page it came from opens beside it.</p>
+        </div>
+      </div>
+      <div class="source-col" id="source">
+        <div class="source-head" id="sourceHead">Blue Harbor Plumbing handbook</div>
+        <div id="sheets"></div>
       </div>
     </div>
+  </article>
+</main>
 
-    <div class="corpus">
-      <h2>Answers come from</h2>
-      <ul>
-        <li>Services and pricing</li>
-        <li>Booking and scheduling</li>
-        <li>Warranty and returns</li>
-        <li>Emergency call outs</li>
-        <li>Payment and invoicing</li>
-      </ul>
-    </div>
+<footer class="fine">Fictional business, invented data.</footer>
 
-    <footer>
-      <a href="/admin">Document admin</a><br>
-      Built by Ha Le as a portfolio sample.
-    </footer>
-  </aside>
-
-  <main class="main">
-    <header>
-      <h2>Ask about anything in the company handbook</h2>
-      <p class="lede">The assistant reads five internal documents and answers only from them. Every sentence carries a numbered citation, and when the handbook does not cover a question it says so instead of guessing.</p>
-    </header>
-
-    <div class="thread" id="thread">
-      <div class="empty" id="empty">
-        <div class="ico">?</div>
-        <b>No questions yet</b>
-        <span>Pick one of the examples on the left, or ask anything covered by the five handbook documents.</span>
-      </div>
-    </div>
-
-    <form class="composer" id="composer" autocomplete="off">
-      <input id="q" placeholder="Ask about pricing, booking, warranty, emergencies or payment" aria-label="Your question">
-      <button type="submit" id="send">Ask</button>
-    </form>
-  </main>
-</div>
 <script src="/static/app.js"></script>
 </body>
 </html>

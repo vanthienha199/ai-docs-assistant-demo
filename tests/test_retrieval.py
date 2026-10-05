@@ -52,3 +52,28 @@ def test_real_questions_score_above_the_guard():
         "Do you take American Express?",
     ):
         assert index.search(question)[0][1] >= MIN_SCORE
+
+
+def test_pages_start_at_two_and_never_go_backwards():
+    index = Index(DOCS)
+    pages = [c.page for c in index.chunks]
+    assert pages[0] == 2, "page 1 is the contents page"
+    assert pages == sorted(pages), "page numbers have to read forwards"
+
+
+def test_each_document_opens_on_its_own_page():
+    index = Index(DOCS)
+    first_pages = {}
+    for chunk in index.chunks:
+        first_pages.setdefault(chunk.document, chunk.page)
+    assert len(set(first_pages.values())) == len(first_pages)
+    for document, page in first_pages.items():
+        shared = {c.document for c in index.chunks if c.page == page}
+        assert shared == {document}, f"page {page} mixes documents"
+
+
+def test_citation_label_names_a_page():
+    index = Index(DOCS)
+    chunk = index.search("how long is the workmanship guarantee")[0][0]
+    assert chunk.cite == f"Handbook p. {chunk.page}"
+    assert index.by_id(chunk.chunk_id) is chunk

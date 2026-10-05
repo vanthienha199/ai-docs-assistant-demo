@@ -21,7 +21,7 @@ SYSTEM = (
     "Answer only from the numbered passages supplied by the user. "
     "Cite every fact with the matching number in square brackets, like [1]. "
     "If the passages do not contain the answer, reply exactly: "
-    "I could not find that in the Blue Harbor documents. "
+    "That is not covered in the Blue Harbor handbook. "
     "Never invent prices, timeframes or policies. "
     "Write two to four short sentences in plain English. Do not use dashes as punctuation."
 )

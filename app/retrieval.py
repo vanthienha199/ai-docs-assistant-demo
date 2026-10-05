@@ -56,10 +56,19 @@ class Chunk:
     heading: str
     text: str
     tokens: list[str] = field(default_factory=list)
+    page: int = 0
 
     @property
     def label(self) -> str:
         return f"{self.title} > {self.heading}" if self.heading else self.title
+
+    @property
+    def anchor(self) -> str:
+        return f"p{self.chunk_id}"
+
+    @property
+    def cite(self) -> str:
+        return f"Handbook p. {self.page}"
 
 
 def _title_of(path: Path, body: str) -> str:
@@ -106,6 +115,7 @@ class Index:
 
     K1 = 1.4
     B = 0.75
+    PAGE_CHARS = 620
 
     def __init__(self, docs_dir: Path):
         self.docs_dir = Path(docs_dir)
@@ -143,12 +153,64 @@ class Index:
                 self.chunks.append(Chunk(chunk_id, path.name, title, heading, text, tokens))
                 chunk_id += 1
 
+        self._paginate()
+
         self.doc_freq = {}
         for chunk in self.chunks:
             for term in set(chunk.tokens):
                 self.doc_freq[term] = self.doc_freq.get(term, 0) + 1
         lengths = [len(c.tokens) for c in self.chunks] or [1]
         self.avg_len = sum(lengths) / len(lengths)
+
+    def _paginate(self) -> None:
+        """Give every passage a page number, the way the printed handbook reads.
+
+        Page 1 is the contents page, each document opens on a fresh page, and a
+        page holds about PAGE_CHARS characters. The numbers are what a citation
+        points at, so they have to stay stable between requests.
+        """
+        page = 2
+        used = 0
+        current_doc = None
+        for chunk in self.chunks:
+            if current_doc is not None and chunk.document != current_doc:
+                page += 1
+                used = 0
+            elif used and used + len(chunk.text) > self.PAGE_CHARS:
+                page += 1
+                used = 0
+            chunk.page = page
+            used += len(chunk.text)
+            current_doc = chunk.document
+
+    @property
+    def pages(self) -> list[dict]:
+        """The handbook as printed pages, for the source pane."""
+        out: list[dict] = []
+        for chunk in self.chunks:
+            if not out or out[-1]["page"] != chunk.page:
+                out.append(
+                    {
+                        "page": chunk.page,
+                        "document": chunk.document,
+                        "title": chunk.title,
+                        "blocks": [],
+                    }
+                )
+            out[-1]["blocks"].append(
+                {
+                    "anchor": chunk.anchor,
+                    "heading": chunk.heading,
+                    "text": chunk.text,
+                }
+            )
+        return out
+
+    def by_id(self, chunk_id: int) -> Chunk | None:
+        for chunk in self.chunks:
+            if chunk.chunk_id == chunk_id:
+                return chunk
+        return None
 
     def _idf(self, term: str) -> float:
         n = len(self.chunks)

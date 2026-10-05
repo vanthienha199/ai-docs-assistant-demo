@@ -9,3 +9,4 @@ node_modules
 raw/
 __pycache__/
 video/
+scripts/tests.html

@@ -1,4 +1,4 @@
-# Warranty, Guarantees and Returns
+# Warranty, guarantees and returns
 
 Blue Harbor Plumbing is a sample company created for this demo. All terms below are fictional.
 

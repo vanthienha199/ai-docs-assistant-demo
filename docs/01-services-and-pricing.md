@@ -1,4 +1,4 @@
-# Services and Pricing
+# Services and pricing
 
 Blue Harbor Plumbing is a sample company created for this demo. All prices below are fictional.
 

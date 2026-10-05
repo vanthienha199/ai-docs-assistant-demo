@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from .handbook import to_html
 from .llm import MODEL, answer as generate_answer
 from .retrieval import Index
 
@@ -20,7 +21,7 @@ DOCS_DIR = Path(os.environ.get("DOCS_DIR", ROOT / "docs"))
 STATIC_DIR = ROOT / "static"
 MIN_SCORE = float(os.environ.get("MIN_SCORE", "4.5"))
 MIN_COVERAGE = float(os.environ.get("MIN_COVERAGE", "0.34"))
-NO_ANSWER = "I could not find that in the Blue Harbor documents."
+NO_ANSWER = "That is not covered in the Blue Harbor handbook."
 
 app = FastAPI(title="Blue Harbor Support Assistant (Sample)")
 index = Index(DOCS_DIR)
@@ -54,6 +55,33 @@ def home() -> FileResponse:
 @app.get("/admin")
 def admin() -> FileResponse:
     return FileResponse(STATIC_DIR / "admin.html")
+
+
+@app.get("/api/handbook")
+def handbook() -> dict:
+    """The whole handbook as printed pages, so the source pane can scroll to any
+    citation without a second round trip."""
+    return {
+        "pages": [
+            {
+                "page": page["page"],
+                "title": page["title"],
+                "document": page["document"],
+                "blocks": [
+                    {
+                        "anchor": block["anchor"],
+                        "heading": block["heading"],
+                        "html": to_html(block["text"]),
+                    }
+                    for block in page["blocks"]
+                ],
+            }
+            for page in index.pages
+        ],
+        "documents": [
+            {"title": d["title"], "filename": d["filename"]} for d in index.documents
+        ],
+    }
 
 
 @app.get("/api/documents")
@@ -107,8 +135,9 @@ def chat(payload: Question) -> JSONResponse:
         return JSONResponse(
             {
                 "answer": NO_ANSWER
-                + " Try asking about pricing, booking, warranty, emergency call outs or payment.",
+                + " The five documents cover pricing, booking, warranty, emergency call outs and payment.",
                 "grounded": False,
+                "status": "not_in_handbook",
                 "citations": [],
                 "backend": "guard",
                 "model": "retrieval guard, no model call",
@@ -123,6 +152,10 @@ def chat(payload: Question) -> JSONResponse:
             "n": i + 1,
             "label": chunk.label,
             "document": chunk.document,
+            "heading": chunk.heading,
+            "page": chunk.page,
+            "anchor": chunk.anchor,
+            "cite": chunk.cite,
             "text": chunk.text,
             "snippet": snippet_of(chunk.text),
             "score": score,
@@ -148,6 +181,7 @@ def chat(payload: Question) -> JSONResponse:
         {
             "answer": text,
             "grounded": True,
+            "status": "answered",
             "citations": [
                 {k: v for k, v in c.items() if k != "text"} for c in citations
             ],

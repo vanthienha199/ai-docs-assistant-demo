@@ -1,0 +1,10 @@
+import puppeteer from "./puppeteer.mjs";
+const browser = await puppeteer.launch({ headless: true });
+const p = await browser.newPage();
+await p.setViewport({ width: 620, height: 1000, deviceScaleFactor: 2 });
+await p.goto("file://" + process.cwd() + "/" + (process.argv[3] || "scripts/compare.html") + "", { waitUntil: "networkidle0" });
+await p.evaluateHandle("document.fonts.ready");
+const box = await (await p.$(".card")).boundingBox();
+await p.screenshot({ path: process.argv[2], clip: { x: box.x - 20, y: box.y - 20, width: box.width + 40, height: box.height + 40 } });
+await browser.close();
+console.log("compare done");

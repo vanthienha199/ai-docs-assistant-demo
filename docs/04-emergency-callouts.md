@@ -1,4 +1,4 @@
-# Emergency Call Outs
+# Emergency call outs
 
 Blue Harbor Plumbing is a sample company created for this demo. All policies below are fictional.
 

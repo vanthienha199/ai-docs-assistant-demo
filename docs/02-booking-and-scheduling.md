@@ -1,4 +1,4 @@
-# Booking and Scheduling
+# Booking and scheduling
 
 Blue Harbor Plumbing is a sample company created for this demo. All policies below are fictional.
 
